@@ -5,6 +5,8 @@ var endTime = function(expr, time) {
     return endTime(expr.right, endTime(expr.left, time));
   } else if(expr.tag === 'par') {
     return Math.max(endTime(expr.left, time), endTime(expr.right, time));
+  } else if(expr.tag === 'rest') {
+    return expr.duration + time;
   }
 }
 var _compile = function(expr, start) {
@@ -24,6 +26,8 @@ var _compile = function(expr, start) {
       pitch: expr.pitch,
       duration: expr.duration
     } ];
+  } else if(expr.tag === 'rest') {
+    return [];
   }
 };
 
@@ -45,7 +49,10 @@ var melody_music =
          right: { tag: 'note', pitch: 'b4', duration: 250 } },
       right:
        { tag: 'seq',
-         left: { tag: 'note', pitch: 'c4', duration: 500 },
+         left: {
+           tag: 'seq',
+           left: { tag: 'note', pitch: 'c4', duration: 500 },
+           right: { tag: 'rest', duration: 250 } },
          right: { tag: 'note', pitch: 'd4', duration: 500 } } };
 
 console.log(melody_music);
