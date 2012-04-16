@@ -7,6 +7,8 @@ var endTime = function(expr, time) {
     return Math.max(endTime(expr.left, time), endTime(expr.right, time));
   } else if(expr.tag === 'rest') {
     return expr.duration + time;
+  } else if(expr.tag === 'repeat') {
+    return expr.count * (endTime(expr.section) - time);
   }
 }
 
@@ -36,6 +38,15 @@ var _compile = function(expr, start) {
     } ];
   } else if(expr.tag === 'rest') {
     return [];
+  } else if(expr.tag === 'repeat') {
+    var ret = [];
+
+    for(var i = 0; i < expr.count; i++) {
+      ret = ret.concat(_compile(expr.section, start));
+      start = endTime(expr.section, start);
+    }
+
+    return ret;
   }
 };
 
@@ -61,7 +72,9 @@ var melody_music =
            tag: 'seq',
            left: { tag: 'note', pitch: 'c4', duration: 500 },
            right: { tag: 'rest', duration: 250 } },
-         right: { tag: 'note', pitch: 'd4', duration: 500 } } };
+         right: { tag: 'repeat',
+           section : { tag: 'note', pitch: 'd4', duration: 500 },
+           count: 3 } } };
 
 console.log(melody_music);
 console.log(compile(melody_music));
