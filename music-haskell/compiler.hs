@@ -5,6 +5,7 @@ data Expression =
   | Note { pitch :: String, pitchNumber :: Integer, duration :: Integer, start :: Integer }
   | Par { left :: Expression, right :: Expression }
   | Rest { duration :: Integer }
+  | Repeat { section :: Expression, count :: Integer }
   deriving (Show)
 
 defaultNote = Note { pitch = "a0", pitchNumber = 0, duration = 0, start = 0 }
@@ -14,6 +15,7 @@ endTime (Note { duration = duration }) start = duration + start
 endTime (Seq { left = left, right = right }) start = endTime right (endTime left start)
 endTime (Par { left = left, right = right }) start = max (endTime left start) (endTime right start)
 endTime (Rest { duration = duration }) start = duration + start
+endTime (Repeat { count = count, section = section }) start = start + count * endTime section 0
 
 convertPitch :: String -> Integer
 convertPitch (letter:number) = 12 + 12 * octave + letterPitch letter
@@ -29,6 +31,10 @@ compile expression = compile' expression 0
     compile' (Par { left = left, right = right }) start = compile' left start ++ compile' right start
     compile' (Note { pitch = pitch, duration = duration }) start = [Note { pitch = pitch, pitchNumber = convertPitch pitch, duration = duration, start = start }]
     compile' (Rest r) start = []
+    compile' (Repeat { count = count, section = section }) start = foldl flatten [] $ map rep [0..count - 1]
+      where
+        rep i = compile' section (start + i * endTime section 0)
+        flatten acc x = acc ++ x
 
 playNote :: [Expression] -> [Expression]
 playNote expression = expression
@@ -46,7 +52,10 @@ toCompileSeq = Seq {
           left = defaultNote { pitch = "c4", duration = 500 },
           right = Rest { duration = 250 }
         },
-        right = defaultNote { pitch = "d4", duration = 500 }
+        right = Repeat {
+          count = 3,
+          section = defaultNote { pitch = "d4", duration = 500 }
+        }
       }
   }
 
