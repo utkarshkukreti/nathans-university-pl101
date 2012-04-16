@@ -9,6 +9,14 @@ var endTime = function(expr, time) {
     return expr.duration + time;
   }
 }
+
+var convertPitch = function(pitch) {
+  var map = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
+  var letterPitch = map[pitch[0]];
+  var octave = parseInt(pitch[1], 10);
+  return 12 + 12 * octave + letterPitch;
+};
+
 var _compile = function(expr, start) {
   if(expr.tag === 'seq') {
     var left = _compile(expr.left, start);
@@ -23,7 +31,7 @@ var _compile = function(expr, start) {
     return [ {
       tag: 'note',
       start: start,
-      pitch: expr.pitch,
+      pitch: convertPitch(expr.pitch),
       duration: expr.duration
     } ];
   } else if(expr.tag === 'rest') {
