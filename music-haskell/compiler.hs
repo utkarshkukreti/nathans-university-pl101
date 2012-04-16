@@ -31,10 +31,9 @@ compile expression = compile' expression 0
     compile' (Par { left = left, right = right }) start = compile' left start ++ compile' right start
     compile' (Note { pitch = pitch, duration = duration }) start = [Note { pitch = pitch, pitchNumber = convertPitch pitch, duration = duration, start = start }]
     compile' (Rest r) start = []
-    compile' (Repeat { count = count, section = section }) start = foldl flatten [] $ map rep [0..count - 1]
+    compile' (Repeat { count = count, section = section }) start = foldl (++) [] $ map rep [0..count - 1]
       where
         rep i = compile' section (start + i * endTime section 0)
-        flatten acc x = acc ++ x
 
 playNote :: [Expression] -> [Expression]
 playNote expression = expression
