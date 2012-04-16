@@ -2,12 +2,14 @@ data Expression =
     Seq { left :: Expression, right :: Expression }
   | Note { pitch :: String, duration :: Integer, start :: Integer }
   | Par { left :: Expression, right :: Expression }
+  | Rest { duration :: Integer }
   deriving (Show)
 
 endTime :: Expression -> Integer -> Integer
 endTime (Note { duration = duration }) start = duration + start
 endTime (Seq { left = left, right = right }) start = endTime right (endTime left start)
 endTime (Par { left = left, right = right }) start = max (endTime left start) (endTime right start)
+endTime (Rest { duration = duration }) start = duration + start
 
 compile :: Expression -> [Expression]
 compile expression = compile' expression 0
@@ -16,6 +18,7 @@ compile expression = compile' expression 0
     compile' (Seq { left = left, right = right }) start = compile' left start ++ compile' right (endTime left start)
     compile' (Par { left = left, right = right }) start = compile' left start ++ compile' right start
     compile' (Note { pitch = pitch, duration = duration }) start = [Note { pitch = pitch, duration = duration, start = start }]
+    compile' (Rest r) start = []
 
 playNote :: [Expression] -> [Expression]
 playNote expression = expression
@@ -29,7 +32,10 @@ toCompileSeq = Seq {
         right = Note { pitch = "b4", duration = 250, start = 0 }
       },
     right = Seq {
-        left = Note { pitch = "c4", duration = 500, start = 0 },
+        left = Seq {
+          left = Note { pitch = "c4", duration = 500, start = 0 },
+          right = Rest { duration = 250 }
+        },
         right = Note { pitch = "d4", duration = 500, start = 0 }
       }
   }
