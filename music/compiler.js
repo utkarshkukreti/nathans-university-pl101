@@ -9,6 +9,12 @@ var compile = function(expr) {
   }
 };
 
+var playNote = function() {};
+
+var playMusic = function(expr) {
+  playNote(compile(expr));
+}
+
 var melody_music =
     { tag: 'seq',
       left:

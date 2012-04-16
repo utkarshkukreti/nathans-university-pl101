@@ -18,6 +18,11 @@ toCompile = Seq {
       }
   }
 
+playNote :: [Expression] -> [Expression]
+playNote expression = expression
+
+playMusic :: Expression -> [Expression]
+playMusic = playNote . compile
 
 main = do
   putStrLn $ show toCompile
